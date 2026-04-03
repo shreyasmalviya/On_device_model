@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Device Gemma 3 — Complete Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #050508;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-pink: #ec4899;
+            --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            --gradient-2: linear-gradient(135deg, #06b6d4, #3b82f6);
+            --gradient-3: linear-gradient(135deg, #8b5cf6, #ec4899);
+            --gradient-4: linear-gradient(135deg, #10b981, #06b6d4);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-bg-hover: rgba(255, 255, 255, 0.08);
+            --glass-blur: blur(20px);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            --shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated background orbs */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: -1;
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #3b82f6, transparent 70%);
+            top: -200px;
+            right: -200px;
+        }
+
+        body::after {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #8b5cf6, transparent 70%);
+            bottom: 20%;
+            left: -150px;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatOrb {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -40px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            position: relative;
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('images/hero_banner.png') center/cover;
+            opacity: 0.2;
+            filter: blur(4px);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.97) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 18px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 50px;
+            color: var(--accent-purple);
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .hero-stat:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .hero-stat .number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== NAVIGATION (Liquid Glass) ===== */
+        .toc {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(30px) saturate(1.5);
+            -webkit-backdrop-filter: blur(30px) saturate(1.5);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .toc-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 2rem;
+            white-space: nowrap;
+        }
+
+        .toc a {
+            padding: 8px 16px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .toc a:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+            color: var(--accent-blue);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        /* ===== SECTION HEADERS ===== */
+        .section {
+            margin-top: 5rem;
+        }
+
+        .section-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .section-number.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .section-number.purple {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--accent-purple);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .section-number.cyan {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        .section-number.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .section-number.orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .section-number.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .section-number.pink {
+            background: rgba(236, 72, 153, 0.15);
+            color: var(--accent-pink);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        h2 .gradient-blue {
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-purple {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-cyan {
+            background: var(--gradient-4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-green {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-orange {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-red {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 .gradient-pink {
+            background: var(--gradient-3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 2.5rem 0 1rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+
+        /* ===== CARDS (Liquid Glass) ===== */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .card:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .card h4 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ===== GRID LAYOUTS ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        /* ===== CODE BLOCKS ===== */
+        pre {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+        }
+
+        p code,
+        li code {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        /* ===== STEP INDICATORS (Liquid Glass) ===== */
+        .steps {
+            position: relative;
+            padding-left: 3rem;
+            margin: 2rem 0;
+        }
+
+        .steps::before {
+            content: '';
+            position: absolute;
+            left: 17px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+        }
+
+        .step {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -3rem;
+            top: 1.5rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .step h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .step p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* ===== TABLES (Liquid Glass) ===== */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+        }
+
+        th {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        td {
+            padding: 12px 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* ===== CALLOUT BOXES (Liquid Glass) ===== */
+        .callout {
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .callout-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .callout.info {
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .callout.success {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .callout.warning {
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .callout.danger {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .callout strong {
+            color: var(--text-primary);
+        }
+
+        /* ===== IMAGES ===== */
+        .img-container {
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 2rem 0;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .img-container img {
+            width: 100%;
+            display: block;
+        }
+
+        .img-caption {
+            padding: 0.8rem 1.2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* ===== MERMAID (Liquid Glass) ===== */
+        .mermaid-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            box-shadow: var(--glass-shadow);
+        }
+
+        /* ===== BUG CARDS (Liquid Glass) ===== */
+        .bug-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .bug-card:hover {
+            background: var(--glass-bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .bug-card.fixed {
+            border-left-color: var(--accent-green);
+        }
+
+        .bug-card .bug-header {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .bug-card .bug-number {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .bug-card.fixed .bug-number {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+        }
+
+        .bug-card .bug-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .bug-card .label {
+            font-weight: 600;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* ===== GLOSSARY (Liquid Glass) ===== */
+        .glossary-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(1.3);
+            -webkit-backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .glossary-item:hover {
+            background: var(--glass-bg-hover);
+            border-color: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+
+        .glossary-item h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--accent-cyan);
+        }
+
+        .glossary-item p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* ===== FOOTER (Liquid Glass) ===== */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--glass-border);
+            margin-top: 5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+        }
+
+        /* ===== TAGS ===== */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tag.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .tag.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .tag.blue {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .tag.orange {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-orange);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-stats {
+                gap: 1rem;
+            }
+
+            h2 {
+                font-size: 1.7rem;
+            }
+
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .toc-inner {
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">📱 100% Offline AI</div>
+            <h1>On-Device Gemma 3</h1>
+            <p>A complete guide to running Google's Gemma 3 LLM entirely on your Android phone — no internet, no
+                servers, no cloud.</p>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="number">270M</div>
+                    <div class="label">Parameters</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">~270MB</div>
+                    <div class="label">Model Size</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">8-bit</div>
+                    <div class="label">Quantization</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">0ms</div>
+                    <div class="label">Network Latency</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav class="toc">
+        <div class="toc-inner">
+            <a href="#how-it-works">🧠 How It Works</a>
+            <a href="#model-file">📦 Model File</a>
+            <a href="#architecture">🏗️ Architecture</a>
+            <a href="#engine">⚡ Engine</a>
+            <a href="#deep-dive">🔬 Deep Dive</a>
+            <a href="#files">📂 Files</a>
+            <a href="#bugs">🐛 Bugs Fixed</a>
+            <a href="#glossary">📖 Glossary</a>
+            <a href="#extend">🚀 Extend</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- ========== SECTION 1: HOW IT WORKS ========== -->
+        <section class="section" id="how-it-works">
+            <div class="section-number blue">1</div>
+            <h2><span class="gradient-blue">How Does AI Run on Your Phone?</span></h2>
+            <p class="section-subtitle">Understanding the magic behind on-device inference</p>
+
+            <h3>☁️ Cloud AI vs 📱 On-Device AI</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>☁️ Cloud AI (ChatGPT, Gemini)</h4>
+                    <p>Your text travels to massive data centers with hundreds of GPUs. Servers process it and return
+                        the answer.</p>
+                    <p><span class="tag red">Needs Internet</span> <span class="tag orange">Privacy Risk</span> <span
+                            class="tag blue">Very Powerful</span></p>
+                </div>
+                <div class="card">
+                    <h4>📱 On-Device AI (Our App)</h4>
+                    <p>The entire AI "brain" lives as a single file on your phone. Your processor does ALL the math
+                        locally.</p>
+                    <p><span class="tag green">100% Offline</span> <span class="tag green">Private</span> <span
+                            class="tag orange">Limited Power</span></p>
+                </div>
+            </div>
+
+            <h3>🔄 What Happens When You Type "Hello"</h3>
+            <p>Every time you send a message, your phone performs these 5 steps — in milliseconds:</p>
+
+            <div class="steps">
+                <div class="step" data-step="1">
+                    <h4>📝 Tokenization</h4>
+                    <p><code>"Hello"</code> → <code>[17534]</code> — Your text is converted into numbers. Each number is
+                        a "token" representing a word or word-piece from a 256,000-word vocabulary.</p>
+                </div>
+                <div class="step" data-step="2">
+                    <h4>📊 Embedding</h4>
+                    <p><code>[17534]</code> → <code>[0.23, -0.67, 0.12, 0.89, ...]</code> — Each token becomes a
+                        256-dimensional vector that captures the "meaning" of that word in mathematical space.</p>
+                </div>
+                <div class="step" data-step="3">
+                    <h4>🧠 Transformer Layers (The Brain)</h4>
+                    <p>The vector passes through <strong>18 transformer layers</strong>. Each layer performs massive
+                        matrix multiplications with millions of weights, refining the meaning through
+                        <em>Self-Attention</em> ("which words matter?") and <em>Feed-Forward</em> ("what comes next?").
+                    </p>
+                </div>
+                <div class="step" data-step="4">
+                    <h4>🎲 Sampling</h4>
+                    <p>After all layers, the model outputs probabilities for every possible next word: "Hi" → 15.2%,
+                        "Hello" → 12.8%, "Hey" → 8.3%... It randomly picks one based on <code>temperature</code> and
+                        <code>topK</code> settings.
+                    </p>
+                </div>
+                <div class="step" data-step="5">
+                    <h4>🔁 Repeat</h4>
+                    <p>The chosen word is added to the sequence, and Steps 2–4 repeat to generate the
+                        <strong>next</strong> word. This continues until the model generates a special
+                        <code>&lt;eos&gt;</code> (End of Sequence) token.
+                    </p>
+                </div>
+            </div>
+
+            <div class="img-container">
+                <img src="images/inference_pipeline.png" alt="AI Inference Pipeline">
+                <div class="img-caption">The AI inference pipeline: Input → Tokenize → Embed → Transform → Sample →
+                    Output</div>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 2: MODEL FILE ========== -->
+        <section class="section" id="model-file">
+            <div class="section-number purple">2</div>
+            <h2><span class="gradient-purple">Understanding the Model File</span></h2>
+            <p class="section-subtitle">What's inside that 270MB .litertlm file?</p>
+
+            <h3>📄 Breaking Down the Filename</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+graph LR
+    A["<strong>gemma3</strong><br/>Google Gemma 3<br/>Model Family"] --> B["<strong>270m</strong><br/>270 Million<br/>Parameters"]
+    B --> C["<strong>it</strong><br/>Instruction<br/>Tuned"]
+    C --> D["<strong>q8</strong><br/>8-bit<br/>Quantization"]
+    D --> E["<strong>.litertlm</strong><br/>LiteRT-LM<br/>Model Bundle"]
+
+    style A fill:#3b82f6,stroke:#3b82f6,color:#fff
+    style B fill:#8b5cf6,stroke:#8b5cf6,color:#fff
+    style C fill:#06b6d4,stroke:#06b6d4,color:#fff
+    style D fill:#10b981,stroke:#10b981,color:#fff
+    style E fill:#f59e0b,stroke:#f59e0b,color:#fff
+        </pre>
+            </div>
+
+            <h3>📦 What's Inside a .litertlm File</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+graph TB
+    TASK["📦 gemma3-270m-it-q8.litertlm"]
+    TASK --> W["🧮 Model Weights<br/>270M numbers, quantized to 8-bit"]
+    TASK --> T["📖 Tokenizer<br/>Dictionary mapping words ↔ numbers"]
+    TASK --> C["⚙️ Configuration<br/>Layer count, hidden size, etc."]
+    TASK --> CT["💬 Chat Template<br/>How to format user/model turns"] 
+    TASK --> M["📋 Metadata<br/>Name, version, features"]
+
+    style TASK fill:#8b5cf6,stroke:#8b5cf6,color:#fff
+    style W fill:#1a1f35,stroke:#3b82f6,color:#e8eaed
+    style T fill:#1a1f35,stroke:#06b6d4,color:#e8eaed
+    style C fill:#1a1f35,stroke:#10b981,color:#e8eaed
+    style CT fill:#1a1f35,stroke:#f59e0b,color:#e8eaed
+    style M fill:#1a1f35,stroke:#ec4899,color:#e8eaed
+        </pre>
+            </div>
+
+            <h3>🔢 What is Quantization?</h3>
+            <p>The model's 270M "weights" are decimal numbers like <code>0.3847264</code>. Quantization compresses them
+                to use less memory:</p>
+
+            <div class="img-container">
+                <img src="images/quantization.png" alt="Quantization comparison">
+                <div class="img-caption">Quantization reduces model size by compressing weight precision</div>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Format</th>
+                    <th>Bits per Weight</th>
+                    <th>Size for 270M</th>
+                    <th>Quality</th>
+                </tr>
+                <tr>
+                    <td><strong>FP32</strong> (Full Precision)</td>
+                    <td>32 bits (4 bytes)</td>
+                    <td>~1.08 GB</td>
+                    <td>⭐⭐⭐⭐⭐ Best</td>
+                </tr>
+                <tr>
+                    <td><strong>Q8 / INT8</strong> (What We Use)</td>
+                    <td>8 bits (1 byte)</td>
+                    <td>~270 MB</td>
+                    <td>⭐⭐⭐⭐ Very Good</td>
+                </tr>
+                <tr>
+                    <td><strong>Q4 / INT4</strong></td>
+                    <td>4 bits (0.5 bytes)</td>
+                    <td>~135 MB</td>
+                    <td>⭐⭐⭐ Good</td>
+                </tr>
+            </table>
+
+            <h3>💬 Base Model vs Instruction Tuned</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>Base Model</h4>
+                    <p>Just predicts the next word.</p>
+                    <p>Input: <em>"The capital of France is"</em><br>Output: <em>"Paris, which is also..."</em></p>
+                </div>
+                <div class="card" style="border-color: rgba(16,185,129,0.3);">
+                    <h4>✅ Instruction Tuned (IT)</h4>
+                    <p>Trained to follow instructions and chat naturally.</p>
+                    <p>Input: <em>"What is the capital of France?"</em><br>Output: <em>"The capital of France is
+                            Paris!"</em></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 3: ARCHITECTURE ========== -->
+        <section class="section" id="architecture">
+            <div class="section-number cyan">3</div>
+            <h2><span class="gradient-cyan">App Architecture</span></h2>
+            <p class="section-subtitle">How all the pieces fit together</p>
+
+            <h3>🏗️ The Full Stack</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+graph TB
+    subgraph FLUTTER["🎯 Flutter App (Dart)"]
+        CS["📱 chat_screen.dart<br/>UI Layer - Messages, Input, Status"]
+        LS["⚙️ llm_service.dart<br/>Business Logic - Load, Generate, Offload"]
+        CS -->|"user types message"| LS
+        LS -->|"response text"| CS
+    end
+
+    subgraph PLUGIN["📦 flutter_gemma Plugin (Dart + Kotlin)"]
+        IM["InferenceModel<br/>Model wrapper"]
+        IC["InferenceChat<br/>Chat session manager"]
+        LS --> IM
+        IM --> IC
+    end
+
+    subgraph NATIVE["🔧 Android Native (Kotlin)"]
+        EF["EngineFactory<br/>Routes .litertlm → LiteRT-LM"]
+        IC -->|"Platform Channel"| EF
+    end
+
+    subgraph ENGINE["⚡ LiteRT-LM Engine (Kotlin + C++)"]
+        LE["LiteRtLmEngine<br/>Model loading"]
+        LS2["LiteRtLmSession<br/>Conversation API"]
+        EF --> LE
+        LE --> LS2
+    end
+
+    subgraph CPP["🧮 C++ Runtime (liblitertlm.so)"]
+        XNN["XNNPack CPU Backend<br/>ARM NEON optimized math"]
+        LS2 --> XNN
+    end
+
+    style FLUTTER fill:#1e293b,stroke:#3b82f6,color:#e8eaed
+    style PLUGIN fill:#1e293b,stroke:#8b5cf6,color:#e8eaed
+    style NATIVE fill:#1e293b,stroke:#06b6d4,color:#e8eaed
+    style ENGINE fill:#1e293b,stroke:#10b981,color:#e8eaed
+    style CPP fill:#1e293b,stroke:#f59e0b,color:#e8eaed
+        </pre>
+            </div>
+
+            <h3>📨 The Journey of a Single Message</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+sequenceDiagram
+    participant U as 👤 User
+    participant CS as 📱 ChatScreen
+    participant LS as ⚙️ LlmService
+    participant IC as 💬 InferenceChat
+    participant ENG as ⚡ LiteRT-LM
+    participant CPU as 🧮 C++ Runtime
+
+    U->>CS: Types "Hello" & presses Send
+    CS->>LS: generateResponse("Hello")
+    LS->>IC: addQueryChunk(Message.text("Hello"))
+    IC->>ENG: sendMessage("Hello")
+    ENG->>CPU: Tokenize → Embed → Transform
+    
+    loop For each word
+        CPU->>CPU: Run 18 transformer layers
+        CPU->>CPU: Sample next token
+        CPU->>ENG: Return token
+    end
+    
+    ENG->>IC: "Hi! How can I help you?"
+    IC->>LS: TextResponse(...)
+    LS->>CS: Return response string
+    CS->>U: Display in chat bubble
+        </pre>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 4: ENGINE ========== -->
+        <section class="section" id="engine">
+            <div class="section-number green">4</div>
+            <h2><span class="gradient-green">The Native Inference Engine</span></h2>
+            <p class="section-subtitle">The most critical part — what runs the actual AI</p>
+
+            <h3>⚙️ Two Engines Inside flutter_gemma</h3>
+            <table>
+                <tr>
+                    <th>Engine</th>
+                    <th>SDK</th>
+                    <th>Files</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td><strong>MediaPipe Engine</strong></td>
+                    <td>Old Google MediaPipe SDK</td>
+                    <td><code>.bin</code>, <code>.tflite</code></td>
+                    <td><span class="tag red">JNI bugs with .task</span></td>
+                </tr>
+                <tr>
+                    <td><strong>LiteRT-LM Engine</strong></td>
+                    <td>New Google LiteRT-LM SDK</td>
+                    <td><code>.litertlm</code></td>
+                    <td><span class="tag green">✅ What we use</span></td>
+                </tr>
+            </table>
+
+            <div class="callout info">
+                <span class="callout-icon">💡</span>
+                <div>
+                    <p><strong>Key Discovery:</strong> The Google AI Edge Gallery app uses the <strong>LiteRT-LM
+                            Engine</strong> — the exact same SDK. The model uses the native <code>.litertlm</code>
+                        format which routes directly to the LiteRT-LM engine. We patched
+                        <code>EngineFactory.kt</code> to fix this.
+                    </p>
+                </div>
+            </div>
+
+            <h3>🔀 The Engine Routing (Before vs After)</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+graph LR
+    FILE[".litertlm file"] 
+
+    subgraph BEFORE["❌ Before Patch"]
+        direction TB
+        MP["MediaPipe Engine"]
+        EMPTY["Empty Response ''"]
+        MP --> EMPTY
+    end
+
+    subgraph AFTER["✅ After Patch"]
+        direction TB
+        LR2["LiteRT-LM Engine"]
+        WORKS["Working Response! 🎉"]
+        LR2 --> WORKS
+    end
+
+    FILE -->|"ORIGINAL routing"| MP
+    FILE -->|"PATCHED routing"| LR2
+
+    style BEFORE fill:#1a0a0a,stroke:#ef4444,color:#e8eaed
+    style AFTER fill:#0a1a0a,stroke:#10b981,color:#e8eaed
+    style EMPTY fill:#ef4444,stroke:#ef4444,color:#fff
+    style WORKS fill:#10b981,stroke:#10b981,color:#fff
+    style FILE fill:#f59e0b,stroke:#f59e0b,color:#fff
+        </pre>
+            </div>
+
+            <h3>📱 CPU vs GPU Backend</h3>
+            <div class="img-container">
+                <img src="images/cpu_vs_gpu.png" alt="CPU vs GPU comparison">
+                <div class="img-caption">CPU processes sequentially (reliable), GPU processes in parallel (faster but
+                    driver-dependent)</div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card" style="border-color: rgba(16,185,129,0.3);">
+                    <h4>✅ CPU Backend (What We Use)</h4>
+                    <p><strong>Technology:</strong> XNNPack with ARM NEON</p>
+                    <p><strong>Pros:</strong> Always works, no driver issues</p>
+                    <p><strong>Cons:</strong> Slightly slower than GPU</p>
+                    <p><span class="tag green">Reliable</span></p>
+                </div>
+                <div class="card" style="border-color: rgba(239,68,68,0.3);">
+                    <h4>❌ GPU Backend (Produces NaN)</h4>
+                    <p><strong>Technology:</strong> OpenCL on Adreno 650</p>
+                    <p><strong>Pros:</strong> Theoretically faster</p>
+                    <p><strong>Cons:</strong> Driver bug on Snapdragon 865 → <code>&lt;pad&gt;</code> tokens</p>
+                    <p><span class="tag red">Broken on your device</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 5: DEEP DIVE ========== -->
+        <section class="section" id="deep-dive">
+            <div class="section-number purple">5</div>
+            <h2><span class="gradient-purple">Deep Dive: Load → Infer → Offload</span></h2>
+            <p class="section-subtitle">Exactly what happens in code when you load a model, chat with it, and unload it
+            </p>
+
+            <!-- ===== PHASE 1: LOADING ===== -->
+            <h3>📥 Phase 1: Model Loading</h3>
+            <p>When you tap the "Load Model" button and select a <code>.litertlm</code> file, here is
+                <strong>everything</strong> that happens — from your finger tap to the model being ready:
+            </p>
+
+            <div class="mermaid-container">
+                <pre class="mermaid">
+sequenceDiagram
+    participant U as 👤 User
+    participant UI as 📱 ChatScreen
+    participant FS as 📂 File System
+    participant SVC as ⚙️ LlmService
+    participant PLG as 📦 FlutterGemma
+    participant MGR as 🗂️ ModelManager
+    participant NAT as 🔧 Kotlin Native
+    participant EF as 🔀 EngineFactory
+    participant ENG as ⚡ LiteRT-LM
+    participant CPP as 🧮 C++ Runtime
+
+    U->>UI: Taps "Load Model" button
+    UI->>UI: Opens FilePicker dialog
+    U->>UI: Selects gemma3-270m-it-q8.litertlm
+    
+    Note over UI,FS: Step 1: Secure File Copy
+    UI->>FS: Get ApplicationDocumentsDirectory
+    FS-->>UI: /data/data/com.example.app/files/
+    UI->>FS: Copy .litertlm file to app-private dir
+    Note over FS: Bypasses Android Scoped Storage
+    
+    Note over UI,SVC: Step 2: Install Model
+    UI->>SVC: loadModel("/data/.../gemma3.litertlm")
+    SVC->>PLG: FlutterGemma.installModel()
+    PLG->>MGR: Register model in SharedPreferences
+    MGR-->>PLG: Model registered as active
+    
+    Note over SVC,ENG: Step 3: Create Engine
+    SVC->>PLG: FlutterGemma.getActiveModel()
+    PLG->>NAT: PlatformChannel → createModel()
+    NAT->>EF: EngineFactory.createFromModelPath()
+    Note over EF: Detects .litertlm → LiteRtLmEngine
+    EF->>ENG: new LiteRtLmEngine(context)
+    ENG->>CPP: Load 270MB weights into RAM
+    CPP->>CPP: Parse model structure
+    CPP->>CPP: Initialize XNNPack CPU backend
+    CPP->>CPP: Allocate KV Cache (1024 tokens)
+    CPP-->>ENG: Engine ready ✅
+    ENG-->>NAT: Model loaded
+    NAT-->>SVC: InferenceModel created
+    
+    Note over SVC,ENG: Step 4: Create Chat Session
+    SVC->>PLG: model.createChat(topK, temp, topP)
+    PLG->>NAT: createSession(config)
+    NAT->>ENG: new Conversation(samplerConfig)
+    ENG-->>SVC: InferenceChat ready ✅
+    
+    SVC-->>UI: Status → LlmStatus.loaded
+    UI->>U: Shows "Model loaded successfully!" ✅
+        </pre>
+            </div>
+
+            <div class="callout success">
+                <span class="callout-icon">💾</span>
+                <div>
+                    <p><strong>Memory Impact:</strong> After loading, the model occupies approximately <strong>~350-400
+                            MB</strong> of RAM (270 MB weights + tokenizer + KV cache + runtime buffers). Your Galaxy
+                        S20 FE has 6-8 GB RAM, so this is manageable.</p>
+                </div>
+            </div>
+
+            <h3>📝 The Loading Code — Annotated Line by Line</h3>
+            <p>Here is the actual code from <code>llm_service.dart</code> with every line explained:</p>
+
+            <div class="card" style="border-color: rgba(139,92,246,0.3);">
+                <pre><code><span style="color:#6b7280;">// ── Step 1: Verify the model file exists on disk ──</span>
+<span style="color:#ef4444;">if</span> (!File(filePath).existsSync()) {
+  <span style="color:#ef4444;">throw</span> Exception(<span style="color:#10b981;">"Model file does not exist"</span>);
+}
+
+<span style="color:#6b7280;">// ── Step 2: Register the model with flutter_gemma's manager ──</span>
+<span style="color:#6b7280;">// This copies metadata to SharedPreferences and marks it as</span>
+<span style="color:#6b7280;">// the "active" model. ModelType.gemmaIt tells the plugin this</span>
+<span style="color:#6b7280;">// model uses Gemma's chat template format.</span>
+<span style="color:#ef4444;">await</span> FlutterGemma.installModel(
+  modelType: ModelType.<span style="color:#3b82f6;">gemmaIt</span>
+).fromFile(filePath).install();
+
+<span style="color:#6b7280;">// ── Step 3: Load the model into RAM and create the engine ──</span>
+<span style="color:#6b7280;">// maxTokens: How many tokens of KV cache to allocate (context window)</span>
+<span style="color:#6b7280;">// preferredBackend: CPU (XNNPack) because GPU has driver bugs</span>
+_model = <span style="color:#ef4444;">await</span> FlutterGemma.getActiveModel(
+  maxTokens: <span style="color:#f59e0b;">1024</span>,
+  preferredBackend: PreferredBackend.<span style="color:#3b82f6;">cpu</span>,
+);
+
+<span style="color:#6b7280;">// ── Step 4: Create a chat session with sampling parameters ──</span>
+<span style="color:#6b7280;">// topK: Consider top 64 most probable next words</span>
+<span style="color:#6b7280;">// temperature: 1.0 = standard randomness</span>
+<span style="color:#6b7280;">// topP: Keep words until 95% cumulative probability</span>
+_chat = <span style="color:#ef4444;">await</span> _model?.createChat(
+  topK: <span style="color:#f59e0b;">64</span>,
+  temperature: <span style="color:#f59e0b;">1.0</span>,
+  topP: <span style="color:#f59e0b;">0.95</span>,
+);</code></pre>
+            </div>
+
+            <!-- ===== PHASE 2: INFERENCE ===== -->
+            <h3 style="margin-top:3rem;">💬 Phase 2: Text Inference (Generating a Response)</h3>
+            <p>When you type a message and press Send, here is the <strong>exact journey</strong> your text takes
+                through every layer of the app:</p>
+
+            <div class="mermaid-container">
+                <pre class="mermaid">
+sequenceDiagram
+    participant U as 👤 User
+    participant UI as 📱 ChatScreen
+    participant SVC as ⚙️ LlmService
+    participant IC as 💬 InferenceChat
+    participant TR as 🔤 Transformer
+    participant NAT as 🔧 Kotlin Native
+    participant ENG as ⚡ LiteRT-LM
+    participant CPU as 🧮 C++ XNNPack
+
+    U->>UI: Types "What is Flutter?" and presses Send
+    UI->>UI: Add user message to chat list
+    UI->>UI: Show loading indicator
+    UI->>SVC: generateResponse("What is Flutter?")
+    
+    Note over SVC,IC: Prepare the Prompt
+    SVC->>IC: addQueryChunk(Message.text(...))
+    IC->>TR: transformToChatPrompt()
+    Note over TR: For .litertlm files: raw text only
+    Note over TR: Engine handles chat template internally
+    TR-->>IC: "What is Flutter?"
+    IC->>NAT: PlatformChannel → addQueryChunk()
+    
+    Note over SVC,CPU: Generate Response
+    SVC->>IC: generateChatResponse()
+    IC->>NAT: PlatformChannel → generateResponse()
+    NAT->>ENG: session.getResponse()
+    
+    Note over ENG,CPU: Native C++ Auto-regressive Loop
+    ENG->>CPU: Tokenize input
+    Note over CPU: "What is Flutter?" → [2134, 603, 23891, 235336]
+    
+    loop Generate each token (word)
+        CPU->>CPU: Embedding lookup
+        CPU->>CPU: Pass through 18 transformer layers
+        Note over CPU: Each layer: Self-Attention → FFN
+        Note over CPU: ~270M multiplications per token!
+        CPU->>CPU: Output logits (256,000 probabilities)
+        CPU->>CPU: Apply topK=64 filter
+        CPU->>CPU: Apply topP=0.95 filter
+        CPU->>CPU: Apply temperature=1.0 scaling
+        CPU->>CPU: Sample one token randomly
+        Note over CPU: token=7089 → "Flutter"
+        CPU->>CPU: Update KV Cache
+        CPU->>CPU: Check if token == EOS
+    end
+    
+    Note over CPU: Final token = EOS → Stop generating
+    
+    CPU-->>ENG: "Flutter is an open-source UI toolkit..."
+    ENG-->>NAT: Response string
+    NAT-->>IC: Raw response
+    IC->>IC: cleanResponse() → strip special tokens
+    IC->>IC: Store in chat history
+    IC-->>SVC: TextResponse("Flutter is an...")
+    SVC-->>UI: Return response string
+    UI->>UI: Remove loading indicator
+    UI->>U: Display AI response in chat bubble ✅
+        </pre>
+            </div>
+
+            <h3>📝 The Inference Code — Annotated</h3>
+            <p>Here's the actual inference code from <code>llm_service.dart</code>:</p>
+
+            <div class="card" style="border-color: rgba(6,182,212,0.3);">
+                <pre><code><span style="color:#6b7280;">// ── generateResponse() in llm_service.dart ──</span>
+Future&lt;String?&gt; generateResponse(String prompt) <span style="color:#ef4444;">async</span> {
+  <span style="color:#6b7280;">// Guard: only run if model is loaded and chat exists</span>
+  <span style="color:#ef4444;">if</span> (_status != LlmStatus.loaded || _chat == <span style="color:#ef4444;">null</span>) <span style="color:#ef4444;">return null</span>;
+
+  <span style="color:#6b7280;">// ── Step 1: Send the user's message to the chat session ──</span>
+  <span style="color:#6b7280;">// This adds it to the conversation context and sends the</span>
+  <span style="color:#6b7280;">// prompt text to the native engine via Platform Channel.</span>
+  <span style="color:#ef4444;">await</span> _chat!.addQueryChunk(
+    Message.text(text: prompt, isUser: <span style="color:#3b82f6;">true</span>)
+  );
+
+  <span style="color:#6b7280;">// ── Step 2: Ask the native engine to generate a response ──</span>
+  <span style="color:#6b7280;">// This is a BLOCKING call. It waits until the C++ runtime</span>
+  <span style="color:#6b7280;">// has finished generating ALL tokens (hit &lt;eos&gt;).</span>
+  <span style="color:#6b7280;">// Internally: tokenize → 18 layers × N tokens → detokenize</span>
+  <span style="color:#ef4444;">final</span> response = <span style="color:#ef4444;">await</span> _chat!.generateChatResponse();
+
+  <span style="color:#6b7280;">// ── Step 3: Extract the text from the response object ──</span>
+  <span style="color:#ef4444;">if</span> (response <span style="color:#ef4444;">is</span> TextResponse) {
+    <span style="color:#ef4444;">return</span> response.token; <span style="color:#6b7280;">// The full generated text</span>
+  }
+  <span style="color:#ef4444;">return null</span>;
+}</code></pre>
+            </div>
+
+            <div class="callout warning">
+                <span class="callout-icon">⏱️</span>
+                <div>
+                    <p><strong>Speed on your device:</strong> The Snapdragon 865 generates approximately <strong>5-15
+                            tokens/second</strong> on CPU with this 270M model. A typical 50-word response takes about
+                        3-8 seconds. Larger models (1B+) would be significantly slower.</p>
+                </div>
+            </div>
+
+            <h3>🔄 Sync vs Streaming Inference</h3>
+            <p>The app supports <strong>two modes</strong> of inference. Here's how they differ:</p>
+
+            <div class="grid-2">
+                <div class="card" style="border-color: rgba(59,130,246,0.3);">
+                    <h4>🔵 Synchronous (Current)</h4>
+                    <p><code>generateChatResponse()</code></p>
+                    <p>Waits for the <strong>entire</strong> response to finish before returning. The user sees a
+                        loading spinner, then the full response appears at once.</p>
+                    <pre><code><span style="color:#6b7280;">// Blocks until all tokens generated</span>
+<span style="color:#ef4444;">final</span> response = <span style="color:#ef4444;">await</span>
+  _chat!.generateChatResponse();
+<span style="color:#6b7280;">// response = "Flutter is a..."</span></code></pre>
+                    <p><span class="tag blue">Simple</span> <span class="tag green">Stable</span></p>
+                </div>
+                <div class="card" style="border-color: rgba(139,92,246,0.3);">
+                    <h4>🟣 Streaming (Available)</h4>
+                    <p><code>generateChatResponseAsync()</code></p>
+                    <p>Returns tokens <strong>one by one</strong> as they're generated. Words appear in real-time, like
+                        ChatGPT's typing effect.</p>
+                    <pre><code><span style="color:#6b7280;">// Each token arrives immediately</span>
+<span style="color:#ef4444;">await for</span> (<span style="color:#ef4444;">final</span> token
+  <span style="color:#ef4444;">in</span> _chat!.generateChatResponseAsync()) {
+  print(token); <span style="color:#6b7280;">// "Flutter" "is" "a"...</span>
+}</code></pre>
+                    <p><span class="tag blue">Real-time</span> <span class="tag orange">More Complex</span></p>
+                </div>
+            </div>
+
+            <!-- ===== PHASE 3: OFFLOADING ===== -->
+            <h3 style="margin-top:3rem;">📤 Phase 3: Model Offloading (Freeing Memory)</h3>
+            <p>When you press the eject/offload button, here's what happens to free up your phone's RAM:</p>
+
+            <div class="mermaid-container">
+                <pre class="mermaid">
+sequenceDiagram
+    participant U as 👤 User
+    participant UI as 📱 ChatScreen
+    participant SVC as ⚙️ LlmService
+    participant MDL as 🧠 InferenceModel
+    participant SES as 💬 Session
+    participant NAT as 🔧 Kotlin Native
+    participant ENG as ⚡ LiteRT-LM
+    participant RAM as 💾 Phone RAM
+
+    U->>UI: Taps "Eject Model" button
+    UI->>SVC: offloadModel()
+    
+    Note over SVC,ENG: Step 1: Close the Chat Session
+    SVC->>MDL: model.close()
+    MDL->>SES: session.close()
+    SES->>NAT: PlatformChannel → closeSession()
+    NAT->>ENG: conversation.close()
+    ENG->>RAM: Free conversation state
+    ENG->>RAM: Free KV Cache (~50 MB)
+    
+    Note over SVC,ENG: Step 2: Release the Engine
+    NAT->>ENG: engine.close()
+    ENG->>RAM: Free model weights (~270 MB)
+    ENG->>RAM: Free tokenizer (~5 MB)
+    ENG->>RAM: Free XNNPack buffers (~50 MB)
+    Note over RAM: ~375 MB freed! 🎉
+    
+    Note over SVC,UI: Step 3: Reset State
+    SVC->>SVC: _model = null
+    SVC->>SVC: _chat = null
+    SVC->>SVC: status = LlmStatus.unloaded
+    SVC-->>UI: Status → unloaded
+    UI->>U: Shows "Load Model" button again
+
+    Note over RAM: Phone RAM is freed,\nother apps can use it now
+        </pre>
+            </div>
+
+            <h3>📝 The Offloading Code — Annotated</h3>
+            <div class="card" style="border-color: rgba(239,68,68,0.3);">
+                <pre><code><span style="color:#6b7280;">// ── offloadModel() in llm_service.dart ──</span>
+Future&lt;void&gt; offloadModel() <span style="color:#ef4444;">async</span> {
+  <span style="color:#6b7280;">// ── Step 1: Close the model (triggers session + engine cleanup) ──</span>
+  <span style="color:#6b7280;">// This cascades through: InferenceModel → Session → Kotlin → C++</span>
+  <span style="color:#6b7280;">// Each layer frees its own resources (KV cache, weights, buffers)</span>
+  <span style="color:#ef4444;">await</span> _model?.close();
+
+  <span style="color:#6b7280;">// ── Step 2: Clear Dart references ──</span>
+  <span style="color:#6b7280;">// Setting to null allows Dart's garbage collector to reclaim</span>
+  <span style="color:#6b7280;">// any remaining Dart-side memory associated with these objects</span>
+  _model = <span style="color:#ef4444;">null</span>;
+  _chat = <span style="color:#ef4444;">null</span>;
+
+  <span style="color:#6b7280;">// ── Step 3: Update status so UI knows to show Load button ──</span>
+  _status = LlmStatus.<span style="color:#3b82f6;">unloaded</span>;
+  notifyListeners(); <span style="color:#6b7280;">// Triggers UI rebuild</span>
+}</code></pre>
+            </div>
+
+            <!-- ===== MEMORY LIFECYCLE ===== -->
+            <h3 style="margin-top:3rem;">📊 Memory Lifecycle — The Full Picture</h3>
+            <p>This diagram shows how your phone's RAM usage changes across the entire lifecycle:</p>
+
+            <div class="mermaid-container">
+                <pre class="mermaid">
+xychart-beta
+    title "Phone RAM Usage During Model Lifecycle"
+    x-axis ["App Start", "File Copy", "Install", "Load Weights", "KV Cache", "Ready", "Chatting", "Offload", "After"]
+    y-axis "RAM Usage (MB)" 0 --> 500
+    bar [50, 80, 85, 350, 400, 400, 420, 80, 50]
+        </pre>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Phase</th>
+                    <th>RAM Used</th>
+                    <th>What's in Memory</th>
+                </tr>
+                <tr>
+                    <td>App Start</td>
+                    <td>~50 MB</td>
+                    <td>Flutter engine, UI framework, Dart VM</td>
+                </tr>
+                <tr>
+                    <td>File Copy</td>
+                    <td>~80 MB</td>
+                    <td>+ File I/O buffers during copy</td>
+                </tr>
+                <tr>
+                    <td>Install</td>
+                    <td>~85 MB</td>
+                    <td>+ Model metadata in SharedPreferences</td>
+                </tr>
+                <tr>
+                    <td>Load Weights</td>
+                    <td>~350 MB</td>
+                    <td>+ 270 MB model weights loaded into RAM</td>
+                </tr>
+                <tr>
+                    <td>KV Cache Allocated</td>
+                    <td>~400 MB</td>
+                    <td>+ KV cache for 1024 token context</td>
+                </tr>
+                <tr>
+                    <td>Ready/Chatting</td>
+                    <td>~400-420 MB</td>
+                    <td>+ Temporary inference buffers</td>
+                </tr>
+                <tr>
+                    <td>After Offload</td>
+                    <td>~50 MB</td>
+                    <td>Back to baseline — all model memory freed</td>
+                </tr>
+            </table>
+
+            <div class="callout info">
+                <span class="callout-icon">💡</span>
+                <div>
+                    <p><strong>Why offloading matters:</strong> The model uses ~350 MB of RAM. If you leave it loaded
+                        while using other apps, your phone may kill background apps to free memory. Always offload when
+                        done chatting!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 6: FILES ========== -->
+        <section class="section" id="files">
+            <div class="section-number orange">6</div>
+            <h2><span class="gradient-orange">What Each File Does</span></h2>
+            <p class="section-subtitle">A map of every important file in the project</p>
+
+            <h3>📂 Your Project Files</h3>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>📄 lib/main.dart</h4>
+                    <p><strong>Role:</strong> Entry point</p>
+                    <p>Creates <code>LlmService</code> and passes it to <code>ChatScreen</code>. Sets up the app theme
+                        and navigation.</p>
+                </div>
+                <div class="card">
+                    <h4>⚙️ lib/services/llm_service.dart</h4>
+                    <p><strong>Role:</strong> Business logic layer</p>
+                    <p>The brain of the app. Manages model lifecycle: <code>loadModel()</code>,
+                        <code>generateResponse()</code>, <code>offloadModel()</code>.
+                    </p>
+                </div>
+                <div class="card">
+                    <h4>📱 lib/screens/chat_screen.dart</h4>
+                    <p><strong>Role:</strong> UI layer</p>
+                    <p>File picker, model file copying to secure storage, chat message display, loading indicators.</p>
+                </div>
+                <div class="card">
+                    <h4>🛡️ android/app/proguard-rules.pro</h4>
+                    <p><strong>Role:</strong> Build protection</p>
+                    <p>Prevents Android's optimizer from deleting MediaPipe/Protobuf classes in release builds.</p>
+                </div>
+            </div>
+
+            <h3>🔧 Plugin Files (flutter_gemma) — Patched</h3>
+            <div class="grid-2">
+                <div class="card" style="border-color: rgba(245,158,11,0.3);">
+                    <h4>🔀 EngineFactory.kt <span class="tag orange">PATCHED</span></h4>
+                    <p>Routes model files to the correct engine based on extension. <code>.litertlm</code>
+                        files route directly to the LiteRT-LM engine.</p>
+                </div>
+                <div class="card">
+                    <h4>⚡ LiteRtLmEngine.kt</h4>
+                    <p>Wraps Google's <code>litertlm.Engine</code>. Handles model loading, backend selection (CPU/GPU),
+                        cache directory.</p>
+                </div>
+                <div class="card">
+                    <h4>💬 LiteRtLmSession.kt</h4>
+                    <p>Wraps <code>Conversation</code> API. Handles adding messages, generating responses, token
+                        streaming.</p>
+                </div>
+                <div class="card">
+                    <h4>🔤 extensions.dart</h4>
+                    <p>Chat prompt formatting. For <code>.litertlm</code> files, passes raw text (engine handles
+                        templates
+                        internally).</p>
+                </div>
+            </div>
+
+            <h3>📊 LlmService State Machine</h3>
+            <div class="mermaid-container">
+                <pre class="mermaid">
+stateDiagram-v2
+    [*] --> Unloaded
+    Unloaded --> Loading : loadModel()
+    Loading --> Loaded : Success
+    Loading --> Error : Exception
+    Loaded --> Unloaded : offloadModel()
+    Error --> Loading : Retry loadModel()
+
+    state Loaded {
+        [*] --> Ready
+        Ready --> Generating : generateResponse()
+        Generating --> Ready : Response received
+    }
+        </pre>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 6: BUGS ========== -->
+        <section class="section" id="bugs">
+            <div class="section-number red">7</div>
+            <h2><span class="gradient-red">The Bugs We Fixed</span></h2>
+            <p class="section-subtitle">5 bugs, 5 fixes — the journey to a working app</p>
+
+            <div class="mermaid-container">
+                <pre class="mermaid">
+timeline
+    title Bug Fix Journey
+    R8 Build Failure : Proguard rules : Missing classes
+    Empty Responses : MediaPipe JNI bug : Thread not attached
+    SIGABRT Crash : Wrong file format : Bad magic number
+    Pad Tokens : GPU NaN decode : OpenCL driver bug
+    Stale Cache : Old file path : SharedPreferences
+        </pre>
+            </div>
+
+            <div class="bug-card fixed">
+                <div class="bug-header">
+                    <span class="bug-number">BUG #1</span>
+                    <span class="bug-title">R8 Build Failure</span>
+                </div>
+                <div class="label">Symptom</div>
+                <p><code>Missing class com.google.mediapipe.proto.CalculatorProfileProto</code></p>
+                <div class="label">Root Cause</div>
+                <p>Android's code optimizer (R8) stripped MediaPipe classes it thought were unused.</p>
+                <div class="label">Fix</div>
+                <p>Added <code>proguard-rules.pro</code> with <code>-keep class com.google.mediapipe.** { *; }</code>
+                </p>
+            </div>
+
+            <div class="bug-card fixed">
+                <div class="bug-header">
+                    <span class="bug-number">BUG #2</span>
+                    <span class="bug-title">Empty Responses (MediaPipe Engine)</span>
+                </div>
+                <div class="label">Symptom</div>
+                <p>Model loads, prompt sent correctly, but response is always <code>""</code></p>
+                <div class="label">Root Cause</div>
+                <p>MediaPipe's C++ code has a JNI threading bug. Callbacks fail with <code>GetEnv: not attached</code> —
+                    the inference thread isn't registered with the Java VM.</p>
+                <div class="label">Fix</div>
+                <p>Patched <code>EngineFactory.kt</code> to route <code>.litertlm</code> files through LiteRT-LM engine
+                    instead of MediaPipe.</p>
+            </div>
+
+            <div class="bug-card fixed">
+                <div class="bug-header">
+                    <span class="bug-number">BUG #3</span>
+                    <span class="bug-title">SIGABRT Crash (Wrong File Format)</span>
+                </div>
+                <div class="label">Symptom</div>
+                <p><code>Fatal signal 6 (SIGABRT) — INVALID_ARGUMENT: Invalid magic number</code></p>
+                <div class="label">Root Cause</div>
+                <p>Using mismatched file extensions confused the binary parser. Different file
+                    formats have different "magic numbers" (header bytes).</p>
+                <div class="label">Fix</div>
+                <p>Used the correct <code>.litertlm</code> format from HuggingFace. LiteRT-LM engine natively supports
+                    this format with proper routing.</p>
+            </div>
+
+            <div class="bug-card fixed">
+                <div class="bug-header">
+                    <span class="bug-number">BUG #4</span>
+                    <span class="bug-title">&lt;pad&gt;&lt;pad&gt;&lt;pad&gt;... Response</span>
+                </div>
+                <div class="label">Symptom</div>
+                <p>Model generates hundreds of <code>&lt;pad&gt;</code> tokens instead of real words</p>
+                <div class="label">Root Cause</div>
+                <p>GPU backend (OpenCL on Snapdragon 865) produces <code>NaN</code> during decode/sampling. Engine
+                    clamps invalid tokens to 0 = <code>&lt;pad&gt;</code>.</p>
+                <div class="label">Fix</div>
+                <p>Switched to <code>PreferredBackend.cpu</code>. XNNPack correctly handles 8-bit quantized operations
+                    on ARM NEON.</p>
+            </div>
+
+            <div class="bug-card fixed">
+                <div class="bug-header">
+                    <span class="bug-number">BUG #5</span>
+                    <span class="bug-title">Stale Cached Model Path</span>
+                </div>
+                <div class="label">Symptom</div>
+                <p>App tries to load <code>gemma3-270m-it-q8.litertlm</code> even after code was reverted</p>
+                <div class="label">Root Cause</div>
+                <p><code>UnifiedModelManager</code> cached the model path in SharedPreferences. The stale
+                    <code>.litertlm</code> path persisted across rebuilds.
+                </p>
+                <div class="label">Fix</div>
+                <p>Added cleanup code to delete stale files + cleared app data on device.</p>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 7: GLOSSARY ========== -->
+        <section class="section" id="glossary">
+            <div class="section-number pink">8</div>
+            <h2><span class="gradient-pink">Key Concepts Glossary</span></h2>
+            <p class="section-subtitle">Every technical term explained simply</p>
+
+            <div class="grid-3">
+                <div class="glossary-item">
+                    <h4>🔢 Quantization</h4>
+                    <p>Compressing model weights from 32-bit to 8-bit or 4-bit. Reduces size 4x–8x with minimal quality
+                        loss.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>📖 Tokenizer</h4>
+                    <p>Dictionary converting text ↔ numbers. "Hello" → <code>[17534]</code>. Special tokens:
+                        <code>&lt;eos&gt;</code>, <code>&lt;pad&gt;</code>.
+                    </p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🧠 Transformer</h4>
+                    <p>The core AI architecture. Uses Self-Attention ("which words matter?") and Feed-Forward layers.
+                        Gemma 3 has 18 layers.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>💾 KV Cache</h4>
+                    <p>Stores intermediate calculations from previous tokens to avoid re-processing.
+                        <code>maxTokens: 1024</code> = max context size.
+                    </p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🌡️ Temperature</h4>
+                    <p>Controls randomness. 0.0 = deterministic, 1.0 = natural (ours), 2.0 = very creative/chaotic.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🎯 Top-K Sampling</h4>
+                    <p>Only consider top K most probable words. <code>topK: 64</code> = pick from top 64 out of 256,000+
+                        options.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>📊 Top-P (Nucleus)</h4>
+                    <p>Consider words that sum to P% probability. <code>topP: 0.95</code> = keep top words until 95%
+                        probability covered.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🌉 Platform Channel</h4>
+                    <p>Flutter's bridge between Dart and native code. Dart ↔ Kotlin ↔ C++. Like a translator between
+                        languages.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🔗 JNI</h4>
+                    <p>Java Native Interface — how Kotlin calls C++ code. The AI runs in C++, but Flutter speaks Dart →
+                        Kotlin → JNI → C++.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>⚡ XNNPack</h4>
+                    <p>Google's CPU math library. Uses ARM NEON hardware instructions for fast neural network
+                        computation on mobile.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🎮 OpenCL</h4>
+                    <p>Standard for GPU computing. Runs model on your Adreno 650 GPU. Faster but driver compatibility
+                        varies.</p>
+                </div>
+                <div class="glossary-item">
+                    <h4>🔤 EOS Token</h4>
+                    <p>End of Sequence — special token the model generates when it's "done talking." Signals the
+                        response is complete.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECTION 8: EXTEND ========== -->
+        <section class="section" id="extend">
+            <div class="section-number blue">9</div>
+            <h2><span class="gradient-blue">How to Modify & Extend</span></h2>
+            <p class="section-subtitle">Make the app your own</p>
+
+            <h3>🎛️ Change Model Parameters</h3>
+            <p>Edit <code>lib/services/llm_service.dart</code>:</p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h4>🎨 More Creative</h4>
+                    <pre><code>_chat = await _model?.createChat(
+   topK: 100,        // More word options
+   temperature: 1.5,  // More random
+   topP: 0.98,       // Wider range
+);</code></pre>
+                </div>
+                <div class="card">
+                    <h4>🎯 More Precise</h4>
+                    <pre><code>_chat = await _model?.createChat(
+   topK: 10,          // Few options
+   temperature: 0.3,   // Deterministic
+   topP: 0.5,         // Narrow range
+);</code></pre>
+                </div>
+            </div>
+
+            <h3>🔄 Use a Different Model</h3>
+            <p>Download any <code>.litertlm</code> model from HuggingFace and select it in the app:</p>
+            <table>
+                <tr>
+                    <th>Model</th>
+                    <th>Size</th>
+                    <th>Speed</th>
+                    <th>Quality</th>
+                </tr>
+                <tr>
+                    <td>Gemma3-270M-IT (Current)</td>
+                    <td>~270 MB</td>
+                    <td>⚡ Fast</td>
+                    <td>⭐⭐⭐ Good for simple tasks</td>
+                </tr>
+                <tr>
+                    <td>Gemma3-1B-IT Q4</td>
+                    <td>~550 MB</td>
+                    <td>⚡ Medium</td>
+                    <td>⭐⭐⭐⭐ Better quality</td>
+                </tr>
+                <tr>
+                    <td>Qwen2.5-1.5B Q8</td>
+                    <td>~1.6 GB</td>
+                    <td>🐢 Slow</td>
+                    <td>⭐⭐⭐⭐⭐ Excellent</td>
+                </tr>
+            </table>
+
+            <h3>📡 Add Streaming (Word-by-Word)</h3>
+            <p><code>llm_service.dart</code> already has <code>generateResponseStream()</code>. To use it:</p>
+            <pre><code>// Instead of waiting for full response:
+final response = await llmService.generateResponse(text);
+
+// Stream words as they generate:
+final stream = llmService.generateResponseStream(text);
+await for (final token in stream!) {
+  setState(() {
+    currentMessage += token;  // Words appear one by one!
+  });
+}</code></pre>
+
+            <h3>📊 Final Configuration Summary</h3>
+            <table>
+                <tr>
+                    <th>Setting</th>
+                    <th>Value</th>
+                    <th>Reason</th>
+                </tr>
+                <tr>
+                    <td>Engine</td>
+                    <td><span class="tag green">LiteRT-LM</span></td>
+                    <td>Same as Google AI Edge Gallery</td>
+                </tr>
+                <tr>
+                    <td>Backend</td>
+                    <td><span class="tag blue">CPU</span></td>
+                    <td>GPU has NaN issues on Snapdragon 865</td>
+                </tr>
+                <tr>
+                    <td>Max Tokens</td>
+                    <td><code>1024</code></td>
+                    <td>Good balance of context vs memory</td>
+                </tr>
+                <tr>
+                    <td>Top-K</td>
+                    <td><code>64</code></td>
+                    <td>Google Gallery default</td>
+                </tr>
+                <tr>
+                    <td>Temperature</td>
+                    <td><code>1.0</code></td>
+                    <td>Google Gallery default</td>
+                </tr>
+                <tr>
+                    <td>Top-P</td>
+                    <td><code>0.95</code></td>
+                    <td>Google Gallery default</td>
+                </tr>
+            </table>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>📱 On-Device Gemma 3 Chat — Built with Flutter + LiteRT-LM</p>
+        <p>Model: Gemma 3 270M IT Q8 · Device: Samsung Galaxy S20 FE (Snapdragon 865)</p>
+        <p>Documentation created on April 2, 2026</p>
+    </footer>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#3b82f6',
+                primaryTextColor: '#e8eaed',
+                primaryBorderColor: '#3b82f6',
+                lineColor: '#6b7280',
+                secondaryColor: '#8b5cf6',
+                tertiaryColor: '#1a1f35',
+                fontSize: '14px',
+            }
+        });
+    </script>
+
+</body>
+
+</html>
