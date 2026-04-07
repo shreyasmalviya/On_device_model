@@ -111,8 +111,8 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 1024,
-        maxHeight: 1024,
+        maxWidth: 896,
+        maxHeight: 896,
         imageQuality: 85,
       );
       if (image != null) {
@@ -134,8 +134,8 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 1024,
-        maxHeight: 1024,
+        maxWidth: 896,
+        maxHeight: 896,
         imageQuality: 85,
       );
       if (image != null) {

@@ -109,9 +109,12 @@ class LlmService extends ChangeNotifier {
   Future<String?> generateResponseWithImage(String prompt, Uint8List imageBytes) async {
     if (_status != LlmStatus.loaded || _chat == null) return null;
     try {
+      // Gemma 3 requires the '<image>' token explicitly in the prompt!
+      final visionPrompt = prompt.contains('<image>') ? prompt : '<image>\n$prompt';
+      
       await _chat!.addQueryChunk(
         Message.withImage(
-          text: prompt,
+          text: visionPrompt,
           imageBytes: imageBytes,
           isUser: true,
         ),
