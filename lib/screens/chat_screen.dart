@@ -304,7 +304,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // Notify user that image is ignored
           setState(() {
             _messages.last = ChatMessage(
-              text: '⚠️ This model (270M) has no vision encoder — image will be ignored. Use Gemma 3 1B+ for image understanding.\n\n_Processing text only..._',
+              text: '⚠️ The loaded model lacks a vision encoder (Gemma 3 270M and 1B are text-only, not multimodal). The image will be ignored. Use Gemma 3 4B+ for image understanding.\n\n_Processing text only..._',
               isUser: false,
             );
             _messages.add(ChatMessage(text: '', isUser: false));
