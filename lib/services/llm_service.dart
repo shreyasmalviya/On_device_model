@@ -48,21 +48,24 @@ class LlmService extends ChangeNotifier {
         );
         _supportsVision = true;
         debugPrint('✅ Model loaded WITH vision support');
-      } catch (_) {
+      } catch (e) {
+        debugPrint('❌ Vision load failed with error: $e');
         // 270M and other text-only models don't have a vision encoder
         _model = await FlutterGemma.getActiveModel(
           maxTokens: 1024,
           preferredBackend: PreferredBackend.cpu,
         );
         _supportsVision = false;
-        debugPrint('ℹ️ Model loaded WITHOUT vision (text-only, no SigLIP encoder)');
+        debugPrint('ℹ️ Model loaded WITHOUT vision (text-only fallback)');
       }
 
-      // 3. Create a chat session matching Google AI Edge Gallery defaults
+      // 3. Create a chat session — must forward supportImage so the session
+      //    does NOT silently drop image bytes before reaching native LiteRT-LM.
       _chat = await _model?.createChat(
          topK: 64,
          temperature: 1.0,
          topP: 0.95,
+         supportImage: _supportsVision,  // ← CRITICAL: gates _addImage() call
       );
 
       _status = LlmStatus.loaded;
@@ -107,25 +110,36 @@ class LlmService extends ChangeNotifier {
   /// For 270M models: image will be ignored (no vision encoder), text-only response.
   /// For 1B+ models: image will be processed by SigLIP and included in inference.
   Future<String?> generateResponseWithImage(String prompt, Uint8List imageBytes) async {
-    if (_status != LlmStatus.loaded || _chat == null) return null;
+    if (_status != LlmStatus.loaded || _model == null) {
+      debugPrint('⛔ generateResponseWithImage: model not loaded');
+      return null;
+    }
     try {
-      // Gemma 3 requires the '<image>' token explicitly in the prompt!
-      final visionPrompt = prompt.contains('<image>') ? prompt : '<image>\n$prompt';
-      
+      debugPrint('📸 Image query: prompt="$prompt", imageBytes=${imageBytes.length} bytes');
+
+      // Ensure we don't recreate the chat session to avoid leaking memory natively.
+      // Use the existing _chat created in loadModel.
       await _chat!.addQueryChunk(
         Message.withImage(
-          text: visionPrompt,
+          text: prompt,
           imageBytes: imageBytes,
           isUser: true,
         ),
       );
+      debugPrint('📸 addQueryChunk completed');
+
       final response = await _chat!.generateChatResponse();
+      debugPrint('📸 Response type: ${response.runtimeType}');
+
       if (response is TextResponse) {
+        debugPrint('📸 Response: "${response.token}" (${response.token.length} chars)');
         return response.token;
       }
+      debugPrint('⚠️ Unexpected response type: ${response.runtimeType}');
       return null;
-    } catch (e) {
-      debugPrint("Multimodal generation error: $e");
+    } catch (e, stackTrace) {
+      debugPrint("❌ Multimodal generation error: $e");
+      debugPrint("❌ Stack trace: $stackTrace");
       return null;
     }
   }

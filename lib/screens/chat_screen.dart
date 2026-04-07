@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/llm_service.dart';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 
@@ -58,7 +59,9 @@ class _ChatScreenState extends State<ChatScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Securing model inside application cache... Please wait.'),
+            content: Text(
+              'Securing model inside application cache... Please wait.',
+            ),
           ),
         );
 
@@ -82,7 +85,9 @@ class _ChatScreenState extends State<ChatScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Loading model into memory... This may take a while.'),
+            content: Text(
+              'Loading model into memory... This may take a while.',
+            ),
           ),
         );
 
@@ -101,9 +106,21 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load model: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load model: $e')));
+    }
+  }
+
+  Future<Uint8List> _convertToPng(Uint8List inputBytes) async {
+    try {
+      final codec = await ui.instantiateImageCodec(inputBytes);
+      final frame = await codec.getNextFrame();
+      final byteData = await frame.image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData!.buffer.asUint8List();
+    } catch (e) {
+      debugPrint("Warning: Failed to convert image to PNG. Using original bytes. Error: $e");
+      return inputBytes;
     }
   }
 
@@ -111,21 +128,22 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.gallery,
-        maxWidth: 896,
-        maxHeight: 896,
+        maxWidth: 512,
+        maxHeight: 512,
         imageQuality: 85,
       );
       if (image != null) {
         final bytes = await image.readAsBytes();
+        final pngBytes = await _convertToPng(bytes);
         setState(() {
-          _pendingImage = bytes;
+          _pendingImage = pngBytes;
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to pick image: $e')));
       }
     }
   }
@@ -134,21 +152,22 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 896,
-        maxHeight: 896,
+        maxWidth: 512,
+        maxHeight: 512,
         imageQuality: 85,
       );
       if (image != null) {
         final bytes = await image.readAsBytes();
+        final pngBytes = await _convertToPng(bytes);
         setState(() {
-          _pendingImage = bytes;
+          _pendingImage = pngBytes;
         });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to capture image: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to capture image: $e')));
       }
     }
   }
@@ -274,11 +293,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final imageToSend = _pendingImage;
     setState(() {
-      _messages.add(ChatMessage(
-        text: prompt,
-        isUser: true,
-        imageBytes: imageToSend,
-      ));
+      _messages.add(
+        ChatMessage(text: prompt, isUser: true, imageBytes: imageToSend),
+      );
       _pendingImage = null;
       _isGenerating = true;
     });
@@ -304,7 +321,8 @@ class _ChatScreenState extends State<ChatScreen> {
           // Notify user that image is ignored
           setState(() {
             _messages.last = ChatMessage(
-              text: '⚠️ The loaded model lacks a vision encoder (Gemma 3 270M and 1B are text-only, not multimodal). The image will be ignored. Use Gemma 3 4B+ for image understanding.\n\n_Processing text only..._',
+              text:
+                  '⚠️ The loaded model lacks a vision encoder (Gemma 3 270M and 1B are text-only, not multimodal). The image will be ignored. Use Gemma 3 4B+ for image understanding.\n\n_Processing text only..._',
               isUser: false,
             );
             _messages.add(ChatMessage(text: '', isUser: false));
@@ -324,7 +342,8 @@ class _ChatScreenState extends State<ChatScreen> {
       } else {
         setState(() {
           _messages.last = ChatMessage(
-            text: "⚠️ Model generated an empty response. The 270M model does not support image analysis — try a 1B+ model for vision tasks.",
+            text:
+                "⚠️ Model generated an empty response. This may be due to an image processing error or insufficient device memory. Check debug logs for details.",
             isUser: false,
           );
         });
@@ -529,7 +548,10 @@ class _ChatScreenState extends State<ChatScreen> {
                       top: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(12),
@@ -608,7 +630,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         color: Colors.black.withValues(alpha: 0.7),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.close, color: Colors.white, size: 14),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -693,7 +719,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   hintText: _pendingImage != null
                       ? "Ask about this image..."
                       : "Chat with Gemma...",
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  hintStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.4),
+                  ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,
